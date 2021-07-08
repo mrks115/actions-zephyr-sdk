@@ -1,0 +1,12 @@
+name: 'Zephyr SDK'
+description: 'download, install and cache zephyr SDK'
+inputs:
+  url:
+    description: 'Where to download the SDK from'
+    required: true
+  cache-name:
+    description: 'cache key for the installed SDK'
+    required: true
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

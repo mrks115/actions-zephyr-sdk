@@ -1,0 +1,36 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'tag name'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action@0.6.0
+      with:
+        access_token: ${{ github.token }}
+
+    - uses: actions/checkout@v2
+
+    - run: npm ci
+    - run: npm run release
+
+    - name: Commit
+      run: |
+        git config user.email "action@github.com"
+        git config user.name "GitHub Action"
+
+        sed -i 's/^dist$//' .gitignore
+        git add dist
+        git commit -m "Release ${{ github.event.inputs.name }}"
+
+    - name: Push (tag)
+      run: git push origin "HEAD:refs/tags/${{ github.event.inputs.name }}"
+
+    - name: Push (branch)
+      run: git push -f origin "HEAD:refs/heads/latest"
