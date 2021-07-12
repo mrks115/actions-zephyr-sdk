@@ -32,5 +32,8 @@ jobs:
     - name: Push (tag)
       run: git push origin "HEAD:refs/tags/${{ github.event.inputs.name }}"
 
-    - name: Push (branch)
+    - name: "Push (branch: latest)"
       run: git push -f origin "HEAD:refs/heads/latest"
+
+    - name: "Push (branch: major version)"
+      run: git push -f origin "HEAD:refs/heads/$(echo "${{ github.event.inputs.name }}" | cut -d '.' -f1)"

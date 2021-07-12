@@ -21,6 +21,7 @@ actions workflow which we can use to automatically:
 - push this to:
   - a new git tag
   - the branch `latest` (force-pushed)
+  - to the branch `vX`, with X being the major version (force-pushed)
 
 That means if you always want the latest code, you use `latest`, if you want
 to stick to a specific version you use the name of the tag, e.g. `v1.0`.
