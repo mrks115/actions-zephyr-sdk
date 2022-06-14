@@ -6,8 +6,11 @@ const os = require('os');
 
 async function run() {
     const url = core.getInput('url');
+    const toolchains = core.getInput('toolchains').split(',').map((x: String) => x.trim());
+
+    const toolchains_cachekey = toolchains.join('+');
     const platform = os.platform();
-    const cacheKey = `${platform}-zephyrsdk-${url}`;
+    const cacheKey = `${platform}-zephyrsdk-${url}-${toolchains_cachekey}`;
     const installDir = '/opt/sdk/zephyr-sdk';
 
     core.exportVariable('ZEPHYR_TOOLCHAIN_VARIANT', 'zephyr');
@@ -21,10 +24,21 @@ async function run() {
 
     core.info(`Cache not found for key: ${cacheKey}`);
 
-    await exec.exec('curl', ['-L', url, '-o', 'setup.run']);
-    await exec.exec('chmod', ['+x', 'setup.run']);
-    await exec.exec('bash', ['-c', `yes | ./setup.run --quiet -- -d ${installDir}`]);
-    await exec.exec('rm', ['setup.run']);
+    if (url.endsWith(".run")) {
+        await exec.exec('curl', ['-L', url, '-o', 'setup.run']);
+        await exec.exec('chmod', ['+x', 'setup.run']);
+        await exec.exec('bash', ['-c', `yes | ./setup.run --quiet -- -d ${installDir}`]);
+        await exec.exec('rm', ['setup.run']);
+    } else if(url.endsWith(".tar.gz")) {
+        const toolchain_args = toolchains.flatMap((x: String) => ['-t', x]).join(' ');
+
+        await exec.exec('curl', ['-L', url, '-o', 'sdk.tar.gz']);
+        await exec.exec('mkdir', ['-p', installDir]);
+        await exec.exec('tar', ['xf', 'sdk.tar.gz', '-C', installDir, '--strip-components=1']);
+        await exec.exec('bash', ['-c', `set -eu ; cd ${installDir} ; yes | ./setup.sh -h -c ${toolchain_args}`]);
+    } else {
+        throw 'unsupported toolchain file extension';
+    }
 
     try {
         await cache.saveCache([installDir], cacheKey);

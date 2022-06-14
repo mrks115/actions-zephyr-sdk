@@ -7,6 +7,10 @@ inputs:
   cache-name:
     description: 'cache key for the installed SDK'
     required: true
+  toolchains:
+    description: 'comma separated list of toolchains to install.'
+    required: false
+    default: 'all'
 runs:
   using: 'node12'
   main: 'dist/index.js'
