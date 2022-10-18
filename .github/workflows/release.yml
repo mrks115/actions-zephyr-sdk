@@ -5,6 +5,11 @@ on:
       name:
         description: 'tag name'
         required: true
+      testmode:
+        description: 'If true, this will not create any other tags'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   release:
@@ -33,7 +38,9 @@ jobs:
       run: git push origin "HEAD:refs/tags/${{ github.event.inputs.name }}"
 
     - name: "Push (branch: latest)"
+      if: ${{ inputs.testmode == false }}
       run: git push -f origin "HEAD:refs/heads/latest"
 
     - name: "Push (branch: major version)"
+      if: ${{ inputs.testmode == false }}
       run: git push -f origin "HEAD:refs/heads/$(echo "${{ github.event.inputs.name }}" | cut -d '.' -f1)"
