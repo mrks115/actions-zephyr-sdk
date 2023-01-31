@@ -4,9 +4,6 @@ inputs:
   url:
     description: 'Where to download the SDK from'
     required: true
-  cache-name:
-    description: 'cache key for the installed SDK'
-    required: true
   toolchains:
     description: 'comma separated list of toolchains to install.'
     required: false
