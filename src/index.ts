@@ -43,7 +43,9 @@ async function run() {
     try {
         await cache.saveCache([installDir], cacheKey);
         core.info(`Cache saved with key: ${cacheKey}`);
-    } catch (error) {
+    } catch (error_: unknown) {
+        const error = error_ as Error;
+
         if (error.name === cache.ValidationError.name) {
             throw error;
         } else if (error.name === cache.ReserveCacheError.name) {
