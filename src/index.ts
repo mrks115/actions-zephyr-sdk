@@ -36,6 +36,13 @@ async function run() {
         await exec.exec('mkdir', ['-p', installDir]);
         await exec.exec('tar', ['xf', 'sdk.tar.gz', '-C', installDir, '--strip-components=1']);
         await exec.exec('bash', ['-c', `set -eu ; cd ${installDir} ; yes | ./setup.sh -h -c ${toolchain_args}`]);
+    } else if(url.endsWith(".tar.xz")) {
+        const toolchain_args = toolchains.flatMap((x: String) => ['-t', x]).join(' ');
+
+        await exec.exec('curl', ['-L', url, '-o', 'sdk.tar.xz']);
+        await exec.exec('mkdir', ['-p', installDir]);
+        await exec.exec('tar', ['xf', 'sdk.tar.xz', '-C', installDir, '--strip-components=1']);
+        await exec.exec('bash', ['-c', `set -eu ; cd ${installDir} ; yes | ./setup.sh -h -c ${toolchain_args}`]);
     } else {
         throw 'unsupported toolchain file extension';
     }
@@ -43,7 +50,9 @@ async function run() {
     try {
         await cache.saveCache([installDir], cacheKey);
         core.info(`Cache saved with key: ${cacheKey}`);
-    } catch (error) {
+    } catch (error_: unknown) {
+        const error = error_ as Error;
+
         if (error.name === cache.ValidationError.name) {
             throw error;
         } else if (error.name === cache.ReserveCacheError.name) {
